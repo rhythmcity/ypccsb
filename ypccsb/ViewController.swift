@@ -7,22 +7,31 @@
 //
 
 import UIKit
+private extension Selector {
+    static let leftbuttonTapped =
+        #selector(ViewController.leftClick(_:))
+    static let rightbuttonTapped =
+        #selector(ViewController.rightClick(_:))
+
+}
 
 class ViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource,UICollectionViewDelegateFlowLayout {
 
     var collectionView:UICollectionView!;
     var list: Array<UIColor> = []
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .Horizontal
-        self.collectionView = UICollectionView.init(frame: CGRectMake(100, 40, 280, 100), collectionViewLayout: layout)
+        self.collectionView = UICollectionView.init(frame: CGRectMake(80, 40, 270, 100), collectionViewLayout: layout)
         self.collectionView.delegate = self;
         self.collectionView.dataSource = self;
         self.collectionView.registerClass(UICollectionViewCell.self, forCellWithReuseIdentifier: "choushabi")
-        self.collectionView.pagingEnabled = true
+        
         self.view.addSubview(self.collectionView)
         list.append(UIColor.redColor())
         list.append(UIColor.greenColor())
@@ -37,10 +46,38 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         
        self.collectionView.setContentOffset(CGPointMake(270, 0) , animated: false)
         
+        
+        let leftbutton = UIButton.init(type: .Custom)
+        
+        leftbutton.frame = CGRectMake(self.collectionView.frame.origin.x - 50, self.collectionView.frame.origin.y, 50, 50)
+        leftbutton.setTitle("←", forState: .Normal)
+        leftbutton.setTitleColor(UIColor.blackColor(), forState: .Normal)
+        leftbutton.addTarget(self, action: .leftbuttonTapped, forControlEvents: .TouchUpInside)
+        
+        self.view.addSubview(leftbutton)
+        
+        let rightbutton = UIButton.init(type: .Custom)
+        
+        rightbutton.frame = CGRectMake(CGRectGetMaxX(self.collectionView.frame) + 10, self.collectionView.frame.origin.y, 50, 50)
+        rightbutton.setTitle("-->", forState: .Normal)
+        rightbutton.setTitleColor(UIColor.blackColor(), forState: .Normal)
+        rightbutton.addTarget(self, action: .rightbuttonTapped, forControlEvents: .TouchUpInside)
+        
+        self.view.addSubview(rightbutton)
     
     }
     
+    func leftClick(sender:UIButton) -> Void {
+        
+        
+        self.collectionView.setContentOffset(CGPointMake(self.collectionView.contentOffset.x - 90, 0), animated: true)
+        
+    }
     
+    func rightClick(sender:UIButton) -> Void {
+        self.collectionView.setContentOffset(CGPointMake(self.collectionView.contentOffset.x + 90, 0), animated: true)
+
+    }
 
     internal func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     
@@ -69,26 +106,26 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     internal func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAtIndex section: Int) -> UIEdgeInsets {
     
         
-        return UIEdgeInsetsMake(0, 10, 0, 10);
+        return UIEdgeInsetsMake(0, 5, 0, 5);
     
     }
     
-    func scrollViewDidScroll(scrollView: UIScrollView){
+   internal func scrollViewDidScroll(scrollView: UIScrollView){
         
         
         let offset = scrollView.contentOffset
         if offset.x <= 0 {
-            let x:CGFloat  = self.collectionView.bounds.width * CGFloat(self.list.count/3 - 2)
+            let x:CGFloat  = (self.collectionView.bounds.width ) * CGFloat(self.list.count/3 - 2)
             scrollView.setContentOffset(CGPointMake(x, 0) , animated: false)
         }
         
         
-        let maxx =   Float(self.collectionView.bounds.width) * Float(self.list.count/3-1)
+        let maxx =   Float(self.collectionView.bounds.width ) * Float(self.list.count/3-1)
         
         let offsetx = Float(offset.x)
         if  offsetx >= maxx{
             
-            let x  = self.view.frame.width
+            let x  = self.collectionView.bounds.width
             scrollView.setContentOffset(CGPointMake(x, 0) , animated: false)
             
         }
@@ -96,6 +133,22 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
         UIView.animateWithDuration(3, animations: { () -> Void in
             
         })
+    }
+    
+    
+    internal func scrollViewDidEndScrollingAnimation(scrollView: UIScrollView) {
+       
+        
+        let offsetx = self.collectionView.contentOffset.x
+        
+        let item:Int  =  Int (offsetx / 90) + 1
+        
+        self.view.backgroundColor =  self.list[item]
+        
+        
+        
+    
+    
     }
     
     override func didReceiveMemoryWarning() {
